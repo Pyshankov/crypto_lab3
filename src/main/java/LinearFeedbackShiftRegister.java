@@ -18,7 +18,6 @@ public class LinearFeedbackShiftRegister {
     //defines a length of register;
     private final int registerLength;
 
-
     LinearFeedbackShiftRegister(long characteristicPolynon,long firstState){
         this.characteristicPolynon=characteristicPolynon;
         int n = Long.numberOfLeadingZeros(this.characteristicPolynon) + 1;
@@ -29,11 +28,19 @@ public class LinearFeedbackShiftRegister {
         this.currentState = this.firstState;
     }
 
-    public long generateNext(){
+    public void reset(){
+        currentState = firstState;
+    }
+
+    public int generateNext(){
             long outputBit = currentState & 1;
             long nextBit = Long.bitCount(currentState & multiplicativeMask) & 1 ;
             currentState = ( currentState >>> 1 ) | (nextBit << (registerLength - 1));
-            return outputBit;
+            return (int) outputBit;
+    }
+
+    public long getFirstState(){
+        return firstState;
     }
 
     public String getCurrentState() {
@@ -48,55 +55,20 @@ public class LinearFeedbackShiftRegister {
     }
 
     public static class GeffeGen {
-
         private LinearFeedbackShiftRegister l1;
         private LinearFeedbackShiftRegister l2;
         private LinearFeedbackShiftRegister l3;
-
         public GeffeGen(LinearFeedbackShiftRegister l1, LinearFeedbackShiftRegister l2, LinearFeedbackShiftRegister l3) {
             this.l1 = l1;
             this.l2 = l2;
             this.l3 = l3;
         }
-
         public long getNext(){
             long x = l1.generateNext();
             long y = l2.generateNext();
             long s = l3.generateNext();
-            return (x & s) ^ ((1 ^ s) & y) ;
+            return (s & x) ^ ((s ^ 1) & y) ;
         }
-
-    }
-
-
-    public static void main(String[] args) {
-
-
-        long test = 0b1101;
-
-        long l1Px = 0b1000000000000000000000001010011l;
-        long l2Px = 0b10000000000000000000000000001001l;
-        long l3Px = 0b100000000000000000000000010101111l;
-
-        System.out.println(l3Px);
-
-        LinearFeedbackShiftRegister l1 = new LinearFeedbackShiftRegister(l1Px, 1);
-        LinearFeedbackShiftRegister l2 = new LinearFeedbackShiftRegister(l2Px, 1);
-        LinearFeedbackShiftRegister l3 = new LinearFeedbackShiftRegister(l3Px, 1);
-
-        System.out.println(l3.getCurrentState());
-
-
-
-        GeffeGen geffeGen = new GeffeGen(l1,l2,l3);
-
-        for ( int i = 0 ; i < 2048 ; i++ ){
-            System.out.println(geffeGen.getNext());
-            System.out.println(l3.getCurrentState());
-        }
-
-
-
     }
 
 }
