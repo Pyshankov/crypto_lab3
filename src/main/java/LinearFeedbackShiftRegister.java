@@ -67,7 +67,7 @@ public class LinearFeedbackShiftRegister {
             long x = l1.generateNext();
             long y = l2.generateNext();
             long s = l3.generateNext();
-            return (s & x) ^ ((s ^ 1) & y) ;
+            return (s & x) ^ (s ^ 1) & y ;
         }
     }
 
